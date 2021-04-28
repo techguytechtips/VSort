@@ -25,10 +25,8 @@ int main(){
 					mkdir("Sorted/Undefined", 0755);
 				}
 				else{
-					memset(ext,0,sizeof(ext));
-					strcat(ext, extp);
+					memcpy(ext, extp, sizeof(extp) + 1);	
 					memmove(ext, ext+1, strlen(ext));
-					printf("%s\n",ext);
 					sprintf(path, "Sorted/%s", ext);
 				}	mkdir(path, 0755);	
 			}
@@ -42,12 +40,9 @@ int main(){
 					rename(dir->d_name, path);
 				}
 				else{
-					memset(ext,0,sizeof(ext));
-					strcat(ext, extp);
-					printf("%s\n", dir->d_name);
+					memcpy(ext, extp, sizeof(extp) + 1);		
 					memmove(ext, ext+1, strlen(ext));
 					sprintf(path, "Sorted/%s/%s",ext, dir->d_name);
-					printf("%s\n", path);		
 					rcheck = rename(dir->d_name, path);
 					if(rcheck != 0)
 						printf("failed rename!");
