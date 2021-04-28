@@ -3,10 +3,13 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <string.h>
-int main(){
-	char path[296];
+int main(int argc, char** argv){
+	char exefile[strlen(argv[0])];
+	memcpy(exefile, argv[0]+2, strlen(argv[0])-1);
+	printf("%s\n", exefile);
+	char  path[296];
 	char* extp;
-	char ext[20];
+	char  ext[20];
 	char* sortdir = "Sorted";
 	// make the "Sorted" directory
 	if ((mkdir(sortdir, 0755)) != 0){
@@ -29,9 +32,9 @@ int main(){
 				// seperate the "." from the filename
 				// if it has no file extension make a "Undefined" folder
 				if((extp = strrchr(dir->d_name,'.')) == NULL){
-					printf("no EXT!\n");
 					mkdir("Sorted/Undefined", 0755);
 				}
+				else if(strcmp(dir->d_name, exefile) == 0);
 				// otherwise make a folder for all of the extensions
 				else{
 					// strrchr returns a pointer to the last period, not a string,
@@ -54,13 +57,14 @@ int main(){
 					sprintf(path, "Sorted/Undefined/%s", dir->d_name);	
 					rename(dir->d_name, path);
 				}
+				else if(strcmp(dir->d_name, exefile) == 0);
 				// otherwise put it in a folder matching it's extension
 				else{
 					memcpy(ext, extp, sizeof(extp) + 1);		
 					memmove(ext, ext+1, strlen(ext));
 					sprintf(path, "Sorted/%s/%s",ext, dir->d_name);
 					if((rename(dir->d_name, path)) != 0)
-						printf("failed rename!");
+						printf("Failed to Rename %s\n", dir->d_name);
 				}	
 			}
 	
