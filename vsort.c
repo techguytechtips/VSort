@@ -6,7 +6,6 @@
 int main(int argc, char** argv){
 	char exefile[strlen(argv[0])];
 	memcpy(exefile, argv[0]+2, strlen(argv[0])-1);
-	printf("%s\n", exefile);
 	char  path[296];
 	char* extp;
 	char  ext[20];
@@ -31,7 +30,7 @@ int main(int argc, char** argv){
 
 				// seperate the "." from the filename
 				// if it has no file extension make a "Undefined" folder
-				if((extp = strrchr(dir->d_name,'.')) == NULL){
+				if((extp = strrchr(dir->d_name + 1,'.')) == NULL){
 					mkdir("Sorted/Undefined", 0755);
 				}
 				else if(strcmp(dir->d_name, exefile) == 0);
@@ -53,7 +52,7 @@ int main(int argc, char** argv){
 	       	{
 			if (dir->d_type == DT_REG){
 				// if there is no extension, put it in the "Undefined" folder
-				if((extp = strrchr(dir->d_name,'.')) == NULL){	
+				if((extp = strrchr(dir->d_name +1,'.')) == NULL){	
 					sprintf(path, "Sorted/Undefined/%s", dir->d_name);	
 					rename(dir->d_name, path);
 				}
