@@ -4,9 +4,9 @@
 #include <sys/stat.h>
 #include <string.h>
 int main(){
-	char path[282];
+	char path[296];
 	char* extp;
-	char ext[6];
+	char ext[20];
 	char* sortdir = "Sorted";
 	// make the "Sorted" directory
 	if ((mkdir(sortdir, 0755)) != 0){
