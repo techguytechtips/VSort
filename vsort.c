@@ -24,6 +24,7 @@ int main(int argc, char** argv){
 		}
 		else
 			printf("Usage: %s [OPTIONS]\n see -h or --help for more information.\n", argv[0]);
+			return 0;
 	}
 	else
 		if ((mkdir(sortdir, 0755)) != 0){
