@@ -11,10 +11,25 @@ int main(int argc, char** argv){
 	char  ext[20];
 	char* sortdir = "Sorted";
 	// make the "Sorted" directory
-	if ((mkdir(sortdir, 0755)) != 0){
-		printf("failed to make directory!\n");
-		return 0;
+	if (argc > 1){
+		if (strcmp(argv[1], "-h") == 0 || strcmp(argv[1], "--help") == 0)
+		{
+			printf("Usage: %s [OPTIONS]\n-f | --force\tContinue if the directory exists.\n", argv[0]);
+			return 0;
+		}
+		if (strcmp(argv[1], "-f" ) == 0 || strcmp(argv[1], "--force") == 0)
+		{		
+			mkdir(sortdir, 0755);
+		
+		}
+		else
+			printf("Usage: %s [OPTIONS]\n see -h or --help for more information.\n", argv[0]);
 	}
+	else
+		if ((mkdir(sortdir, 0755)) != 0){
+			printf("Directory exists or insufficient permissions.\nUse -f or --force to use existing directory.\n");
+			return 0;
+		}
 
 	// open the current working directory
 	DIR *d;
