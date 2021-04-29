@@ -9,7 +9,7 @@ int main(int argc, char** argv){
 	char* extp;
 	char  ext[20];
 	char* sortdir = "Sorted";
-	int sortedflag = 0;
+	short sortedflag = 0;
 	// make the "Sorted" directory
 	if (argc > 1){
 		if (strcmp(argv[1], "-h") == 0 || strcmp(argv[1], "--help") == 0)
@@ -56,7 +56,7 @@ int main(int argc, char** argv){
 					// seperate the "." from the filename
 					// if it has no file extension make a "Undefined" folder
 					if((extp = strrchr(dir->d_name + 1,'.')) == NULL){
-							if(!sortedflag)
+						if(!sortedflag)
 							mkdir("Sorted/Undefined", 0755);
 						else
 							mkdir("Undefined", 0755);
