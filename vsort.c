@@ -14,7 +14,7 @@ int main(int argc, char** argv){
 	if (argc > 1){
 		if (strcmp(argv[1], "-h") == 0 || strcmp(argv[1], "--help") == 0)
 		{
-			printf("Usage: %s [OPTIONS]\n-f | --force\tContinue if the directory exists.\n", argv[0]);
+			printf("Usage: %s [OPTIONS]\n-f | --force\tContinue if the directory exists.\n-n | --no-dir\tDon't create a Sorted Directory.\n", argv[0]);
 			return 0;
 		}
 		else if (strcmp(argv[1], "-f" ) == 0 || strcmp(argv[1], "--force") == 0)
