@@ -3,6 +3,7 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <string.h>
+#include <getopt.h>
 int main(int argc, char** argv){
 	char exefile[strlen(argv[0])];		
 	char  path[296];
@@ -10,35 +11,36 @@ int main(int argc, char** argv){
 	char  ext[20];
 	char* sortdir = "Sorted";
 	short sortedflag = 0;
+	short hiddenflag = 0;
+	int option_index = 0;
 	// make the "Sorted" directory
 	if (argc > 1){
-		if (strcmp(argv[1], "-h") == 0 || strcmp(argv[1], "--help") == 0)
+		if (strcmp(argv[1], "--help") == 0)
 		{
-			printf("Usage: %s [OPTIONS]\n-f | --force\tContinue if the directory exists.\n-n | --no-dir\tDon't create a Sorted Directory.\n", argv[0]);
+			printf("Usage: %s [OPTIONS]\n-h\tDon't sort hidden files.\n-n \tDon't create a Sorted Directory.\n", argv[0]);
 			return 0;
 		}
-		else if (strcmp(argv[1], "-f" ) == 0 || strcmp(argv[1], "--force") == 0)
-		{		
-			mkdir(sortdir, 0755);
-			memcpy(exefile, argv[0]+2, strlen(argv[0])-1);
+
+		while (( option_index = getopt(argc, argv, "hn")) != -1){
+			switch (option_index){
+				case 'n':
+					sortedflag = 1;
+					break;
+				case 'h':
+					hiddenflag = 1;
+					break;
+				default:
 				
-		}
-		else if(strcmp(argv[1], "-n") == 0 || strcmp(argv[1], "--no-dir") == 0){
-			sortedflag = 1;
-		}
-		else{
-			printf("Usage: %s [OPTIONS]\n see -h or --help for more information.\n", argv[0]);
-			return 0;
+					printf("Usage: %s [OPTIONS]\n see --help for more information.\n", argv[0]);
+					return 0;
+			}
+
 		}
 	}
-	else{
-		if ((mkdir(sortdir, 0755)) != 0){
-			printf("Directory exists or insufficient permissions.\nUse -f or --force to use existing directory.\n");
-			return 0;
-		}	
-		memcpy(exefile, argv[0]+2, strlen(argv[0])-1);
-		
+	if(!sortedflag){	
+		mkdir(sortdir, 0755);
 	}
+	memcpy(exefile, argv[0]+2, strlen(argv[0])-1);
 
 	// open the current working directory
 	DIR *d;
@@ -52,6 +54,7 @@ int main(int argc, char** argv){
 			// make sure its a regular file, no folders, symlinks, inodes, etc.
 			if(dir->d_type == DT_REG){
 				if(strcmp(dir->d_name, exefile) == 0);
+				if(dir->d_name[0] == '.' && hiddenflag == 1);
 				else{	
 					// seperate the "." from the filename
 					// if it has no file extension make a "Undefined" folder
@@ -87,6 +90,7 @@ int main(int argc, char** argv){
 			if (dir->d_type == DT_REG){
 					
 				if(strcmp(dir->d_name, exefile) == 0);
+				if(dir->d_name[0] == '.' && hiddenflag == 1);
 				else{
 				
 					// if there is no extension, put it in the "Undefined" folder
