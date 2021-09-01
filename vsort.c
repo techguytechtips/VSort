@@ -19,9 +19,9 @@ int main(int argc, char** argv){
 	int option_index = 0;
 
 	// array for advanced sorting
-	Video = ["mp4", "mkv", "avi", "ogg", "flv", "mov"]
-	Audio = ["mp3", "wma", "m4a", "pcm", "wav", "aiff", "aac", "ogg", "flac", "alac"]
-	Photo = ["png", "jpg", "jpeg", "mpo"]
+	char* Video[] = {"mp4", "mkv", "avi", "ogg", "flv", "mov"};
+	char* Audio[] = {"mp3", "wma", "m4a", "pcm", "wav", "aiff", "aac", "ogg", "flac", "alac"};
+	char* Photo[] = {"png", "jpg", "jpeg", "mpo"};
 	// make the "Sorted" directory
 	if (argc > 1){
 		if (strcmp(argv[1], "--help") == 0)
@@ -68,16 +68,16 @@ int main(int argc, char** argv){
 				if(strcmp(dir->d_name, exefile) == 0);
 				if(dir->d_name[0] == '.' && hiddenflag == 1);
 				else{	
-					if
+
+					extp = strrchr(dir->d_name + 1,'.');
 					// seperate the "." from the filename
 					// if it has no file extension make a "Undefined" folder
-					if((extp = strrchr(dir->d_name + 1,'.')) == NULL){
+					if(extp == NULL){
 						if(!sortedflag)
 							mkdir("Sorted/Undefined", 0755);
 						else
 							mkdir("Undefined", 0755);
 					}
-				
 					// otherwise make a folder for all of the extensions
 					else{
 						// strrchr returns a pointer to the last period, not a string,
@@ -90,7 +90,8 @@ int main(int argc, char** argv){
 							mkdir(path, 0755);
 						}
 						else
-							mkdir(ext, 0755);	
+							mkdir(ext, 0755);
+
 					}
 				}
 			}
