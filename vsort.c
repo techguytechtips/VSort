@@ -10,14 +10,23 @@ int main(int argc, char** argv){
 	char* extp;
 	char  ext[20];
 	char* sortdir = "Sorted";
-	short sortedflag = 0;
-	short hiddenflag = 0;
+
+	// flags
+	unsigned char sortedflag = 0;
+	unsigned char hiddenflag = 0;
+	unsigned char advancedflag = 0;
+
 	int option_index = 0;
+
+	// array for advanced sorting
+	Video = ["mp4", "mkv", "avi", "ogg", "flv", "mov"]
+	Audio = ["mp3", "wma", "m4a", "pcm", "wav", "aiff", "aac", "ogg", "flac", "alac"]
+	Photo = ["png", "jpg", "jpeg", "mpo"]
 	// make the "Sorted" directory
 	if (argc > 1){
 		if (strcmp(argv[1], "--help") == 0)
 		{
-			printf("Usage: %s [OPTIONS]\n-h\tDon't sort hidden files.\n-n \tDon't create a Sorted Directory.\n", argv[0]);
+			printf("Usage: %s [OPTIONS]\n-h\tDon't sort hidden files.\n-n \tDon't create a Sorted Directory.\n-a\tAdvanced Sorting, see Github for more info.\n", argv[0]);
 			return 0;
 		}
 
@@ -28,6 +37,9 @@ int main(int argc, char** argv){
 					break;
 				case 'h':
 					hiddenflag = 1;
+					break;
+				case 'a':
+					advancedflag = 1;
 					break;
 				default:
 				
@@ -56,6 +68,7 @@ int main(int argc, char** argv){
 				if(strcmp(dir->d_name, exefile) == 0);
 				if(dir->d_name[0] == '.' && hiddenflag == 1);
 				else{	
+					if
 					// seperate the "." from the filename
 					// if it has no file extension make a "Undefined" folder
 					if((extp = strrchr(dir->d_name + 1,'.')) == NULL){
