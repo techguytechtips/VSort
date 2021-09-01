@@ -8,3 +8,8 @@ Just run VSort and it will Create a "Sorted" directory and copy all the files in
 
 ## Options
 Vsort has a help menu (`--help`), a option to exclude hidden files from being sorted (`-h`) and a option to put all of the folders it makes in the current working directory instead of a "Sorted" folder (`-n`).
+
+## Note
+Linux only.
+
+Windows support coming soon!
