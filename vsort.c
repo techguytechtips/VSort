@@ -106,12 +106,11 @@ int main(int argc, char** argv){
 				if(strcmp(dir->d_name, exefile) == 0);
 				if(dir->d_name[0] == '.' && hiddenflag == 1);
 				else{
-				
+					extp = strrchr(dir->d_name + 1,'.');
 					// if there is no extension, put it in the "Undefined" folder
-					if((extp = strrchr(dir->d_name +1,'.')) == NULL){
+					if(extp == NULL){
 						if(!sortedflag)
 							sprintf(path, "Sorted/Undefined/%s", dir->d_name);	
-					
 						else
 							sprintf(path, "Undefined/%s", dir->d_name);
 
