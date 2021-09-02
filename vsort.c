@@ -43,6 +43,7 @@ int getType(char* ext, char* type){
 int main(int argc, char** argv){
 	char exefile[strlen(argv[0])];		
 	char  path[296];
+	char dirpath[296];
 	char* extp;
 	char  ext[20];
 	char* sortdir = "Sorted";
@@ -105,10 +106,17 @@ int main(int argc, char** argv){
 					// seperate the "." from the filename
 					// if it has no file extension make a "Undefined" folder
 					if(extp == NULL){
-						if(!sortedflag)
+						if(!sortedflag){
 							mkdir("Sorted/Undefined", 0755);
-						else
+							sprintf(path, "Sorted/Undefined/%s", dir->d_name);
+						}
+						else{
 							mkdir("Undefined", 0755);
+							sprintf(path, "Undefined/%s", dir->d_name);	
+						}
+						if((rename(dir->d_name, path)) != 0)
+							printf("Failed to Rename %s\n", dir->d_name);
+
 					}
 					// otherwise make a folder for all of the extensions
 					else{
@@ -121,78 +129,39 @@ int main(int argc, char** argv){
 							if (advancedflag){
 								if(getType(ext, type) < 0)
 									printf("file extension \"%s\" not defined\n", ext);
-								sprintf(path, "Sorted/%s", type);
+
+								sprintf(dirpath, "Sorted/%s", type);
+								sprintf(path, "Sorted/%s/%s", type, dir->d_name);
 							}
-							else sprintf(path, "Sorted/%s", ext);
+							else{
+								sprintf(dirpath, "Sorted/%s", ext);
+								sprintf(path, "Sorted/%s/%s",ext, dir->d_name);
+							}
 
 						
 						}	
 						else
 							if (advancedflag){
 								getType(ext, type);
-								strcpy(path, type);
+								strcpy(dirpath, type);
+								sprintf(path, "%s/%s", type, dir->d_name);
 							}
-							else strcpy(path, ext);
-						mkdir(path, 0755);
+							else{
+								strcpy(dirpath, ext);
+								sprintf(path, "%s/%s",ext, dir->d_name);
+							}
+						mkdir(dirpath, 0755);
+						if((rename(dir->d_name, path)) != 0)
+							printf("Failed to Rename %s\n", dir->d_name);
+
 
 					}
 				}
 			}
 		}
-		// go back to to the beginning of the directory pointer
-		rewinddir(d);
-		// loop for putting files in the folders
-		while ((dir = readdir(d)) != NULL)
-	       	{
-			if (dir->d_type == DT_REG){
-					
-				if(strcmp(dir->d_name, exefile) == 0);
-				else if(dir->d_name[0] == '.' && hiddenflag == 1);
-				else{
-					extp = strrchr(dir->d_name + 1,'.');
-					// if there is no extension, put it in the "Undefined" folder
-					if(extp == NULL){
-						if(!sortedflag)
-							sprintf(path, "Sorted/Undefined/%s", dir->d_name);	
-						else
-							sprintf(path, "Undefined/%s", dir->d_name);
-
-						if((rename(dir->d_name, path)) != 0)
-							printf("Failed to Rename %s\n", dir->d_name);
-
-					}
-					// otherwise put it in a folder matching it's extension
-					else{
-						memcpy(ext, extp, sizeof(extp) + 1);		
-						memmove(ext, ext+1, strlen(ext));
-						if(!sortedflag){
-
-							if (advancedflag){
-									getType(ext, type);
-									sprintf(path, "Sorted/%s/%s", type, dir->d_name);
-							}
-							else sprintf(path, "Sorted/%s/%s",ext, dir->d_name);
-									
-						}
-						else{
-							if (advancedflag){
-									getType(ext, type);
-									sprintf(path, "%s/%s", type, dir->d_name);
-							}
-							else sprintf(path, "%s/%s",ext, dir->d_name);
-						}
-						if((rename(dir->d_name, path)) != 0)
-							printf("Failed to Rename %s\n", dir->d_name);
-					}
-				}	
-			}
-	
-					
-		}
-		closedir(d);
+				closedir(d);
 		
 	}
-	
-	
+		
 	return 0;
 }
