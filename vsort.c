@@ -11,12 +11,42 @@ unsigned char checkType(char* ext, char** Type, size_t sizeofType){
 	}
 	return 0;
 }
+int getType(char* ext, char* type){
+
+	// array for advanced sorting
+	char* Video[] = {"mp4", "mkv", "avi", "ogg", "flv", "mov"};
+	char* Audio[] = {"mp3", "wma", "m4a", "pcm", "wav", "aiff", "aac", "ogg", "flac", "alac"};
+	char* Photo[] = {"png", "jpg", "jpeg", "mpo"};
+	char* Document[] = {"docx", "doc", "pdf", "odt", "odp", "xlsx", "txt", "json", "cfg", "config", "notebook", "c", "cpp", "cs", "py", "js", "rb", "out"};
+	char* Shortcut[] = {"lnk", "desktop", "url"};
+	char* Image[] = {"img", "iso", "dvd"};
+	if (checkType(ext, Video, sizeof(Video) / sizeof(Video[0])) == 1)
+		strcpy(type, "Videos");
+	else if (checkType(ext, Audio, sizeof(Audio) / sizeof(Audio[0])) == 1)
+		strcpy(type, "Audios");
+	else if (checkType(ext, Photo, sizeof(Photo) / sizeof(Photo[0])) == 1)
+		strcpy(type, "Photos");
+	else if (checkType(ext, Document, sizeof(Document) / sizeof(Document[0])) == 1)
+		strcpy(type, "Documents");
+	else if (checkType(ext, Shortcut, sizeof(Shortcut) / sizeof(Shortcut[0])) == 1)
+		strcpy(type, "Shortcuts");
+	else if (checkType(ext, Image, sizeof(Image) / sizeof(Image[0])) == 1)
+		strcpy(type, "Disc Images");
+	else{
+		strcpy(type, "Undefined");
+		return -1;
+	}
+	return 0;
+
+}
+
 int main(int argc, char** argv){
 	char exefile[strlen(argv[0])];		
 	char  path[296];
 	char* extp;
 	char  ext[20];
 	char* sortdir = "Sorted";
+	char type[20];
 
 	// flags
 	unsigned char sortedflag = 0;
@@ -25,10 +55,6 @@ int main(int argc, char** argv){
 
 	int option_index = 0;
 
-	// array for advanced sorting
-	char* Video[] = {"mp4", "mkv", "avi", "ogg", "flv", "mov"};
-	char* Audio[] = {"mp3", "wma", "m4a", "pcm", "wav", "aiff", "aac", "ogg", "flac", "alac"};
-	char* Photo[] = {"png", "jpg", "jpeg", "mpo"};
 	// make the "Sorted" directory
 	if (argc > 1){
 		if (strcmp(argv[1], "--help") == 0)
@@ -93,28 +119,21 @@ int main(int argc, char** argv){
 						// make the folders depending on the sortedflag
 						if(!sortedflag){
 							if (advancedflag){
-									if (checkType(ext, Video, sizeof(Video) / sizeof(Video[0])) == 1)
-										mkdir("Sorted/Video", 0755);
-									else if (checkType(ext, Audio, sizeof(Audio) / sizeof(Audio[0])) == 1)
-										mkdir("Sorted/Audio", 0755);
-									else if (checkType(ext, Photo, sizeof(Photo) / sizeof(Photo[0])) == 1)
-										mkdir("Sorted/Photo", 0755);
+								if(getType(ext, type) < 0)
+									printf("file extension \"%s\" not defined\n", ext);
+								sprintf(path, "Sorted/%s", type);
 							}
-							else {
-								sprintf(path, "Sorted/%s", ext);
-								mkdir(path, 0755);
-							}
+							else sprintf(path, "Sorted/%s", ext);
+
+						
 						}	
 						else
 							if (advancedflag){
-								if (checkType(ext, Video, sizeof(Video) / sizeof(Video[0])) == 1)
-									mkdir("Video", 0755);
-								else if (checkType(ext, Audio, sizeof(Audio) / sizeof(Audio[0])) == 1)
-									mkdir("Audio", 0755);
-								else if (checkType(ext, Photo, sizeof(Photo) / sizeof(Photo[0])) == 1)
-									mkdir("Photo", 0755);
+								getType(ext, type);
+								strcpy(path, type);
 							}
-							else mkdir(ext, 0755);
+							else strcpy(path, ext);
+						mkdir(path, 0755);
 
 					}
 				}
@@ -149,24 +168,16 @@ int main(int argc, char** argv){
 						if(!sortedflag){
 
 							if (advancedflag){
-								if (checkType(ext, Video, sizeof(Video) / sizeof(Video[0])) == 1)
-									sprintf(path, "Sorted/Video/%s", dir->d_name);
-								else if (checkType(ext, Audio, sizeof(Audio) / sizeof(Audio[0])) == 1)
-									sprintf(path, "Sorted/Audio/%s", dir->d_name);
-								else if (checkType(ext, Photo, sizeof(Photo) / sizeof(Photo[0])) == 1)
-									sprintf(path, "Sorted/Photo/%s", dir->d_name);
+									getType(ext, type);
+									sprintf(path, "Sorted/%s/%s", type, dir->d_name);
 							}
 							else sprintf(path, "Sorted/%s/%s",ext, dir->d_name);
 									
 						}
 						else{
 							if (advancedflag){
-								if (checkType(ext, Video, sizeof(Video) / sizeof(Video[0])) == 1)
-									sprintf(path, "Video/%s", dir->d_name);
-								else if (checkType(ext, Audio, sizeof(Audio) / sizeof(Audio[0])) == 1)
-									sprintf(path, "Audio/%s", dir->d_name);
-								else if (checkType(ext, Photo, sizeof(Photo) / sizeof(Photo[0])) == 1)
-									sprintf(path, "Photo/%s", dir->d_name);
+									getType(ext, type);
+									sprintf(path, "%s/%s", type, dir->d_name);
 							}
 							else sprintf(path, "%s/%s",ext, dir->d_name);
 						}
