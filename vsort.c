@@ -4,6 +4,13 @@
 #include <sys/stat.h>
 #include <string.h>
 #include <getopt.h>
+unsigned char checkType(char* ext, char** Type, size_t sizeofType){
+	for(unsigned short i = 0; i < sizeofType; i++){
+			if (strcmp(ext, Type[i]) == 0)	
+				return 1;
+	}
+	return 0;
+}
 int main(int argc, char** argv){
 	char exefile[strlen(argv[0])];		
 	char  path[296];
@@ -30,7 +37,7 @@ int main(int argc, char** argv){
 			return 0;
 		}
 
-		while (( option_index = getopt(argc, argv, "hn")) != -1){
+		while (( option_index = getopt(argc, argv, "hna")) != -1){
 			switch (option_index){
 				case 'n':
 					sortedflag = 1;
@@ -66,9 +73,8 @@ int main(int argc, char** argv){
 			// make sure its a regular file, no folders, symlinks, inodes, etc.
 			if(dir->d_type == DT_REG){
 				if(strcmp(dir->d_name, exefile) == 0);
-				if(dir->d_name[0] == '.' && hiddenflag == 1);
+				else if(dir->d_name[0] == '.' && hiddenflag == 1);
 				else{	
-
 					extp = strrchr(dir->d_name + 1,'.');
 					// seperate the "." from the filename
 					// if it has no file extension make a "Undefined" folder
@@ -86,11 +92,29 @@ int main(int argc, char** argv){
 						memmove(ext, ext+1, strlen(ext));
 						// make the folders depending on the sortedflag
 						if(!sortedflag){
-							sprintf(path, "Sorted/%s", ext);
-							mkdir(path, 0755);
-						}
+							if (advancedflag){
+									if (checkType(ext, Video, sizeof(Video) / sizeof(Video[0])) == 1)
+										mkdir("Sorted/Video", 0755);
+									else if (checkType(ext, Audio, sizeof(Audio) / sizeof(Audio[0])) == 1)
+										mkdir("Sorted/Audio", 0755);
+									else if (checkType(ext, Photo, sizeof(Photo) / sizeof(Photo[0])) == 1)
+										mkdir("Sorted/Photo", 0755);
+							}
+							else {
+								sprintf(path, "Sorted/%s", ext);
+								mkdir(path, 0755);
+							}
+						}	
 						else
-							mkdir(ext, 0755);
+							if (advancedflag){
+								if (checkType(ext, Video, sizeof(Video) / sizeof(Video[0])) == 1)
+									mkdir("Video", 0755);
+								else if (checkType(ext, Audio, sizeof(Audio) / sizeof(Audio[0])) == 1)
+									mkdir("Audio", 0755);
+								else if (checkType(ext, Photo, sizeof(Photo) / sizeof(Photo[0])) == 1)
+									mkdir("Photo", 0755);
+							}
+							else mkdir(ext, 0755);
 
 					}
 				}
@@ -104,7 +128,7 @@ int main(int argc, char** argv){
 			if (dir->d_type == DT_REG){
 					
 				if(strcmp(dir->d_name, exefile) == 0);
-				if(dir->d_name[0] == '.' && hiddenflag == 1);
+				else if(dir->d_name[0] == '.' && hiddenflag == 1);
 				else{
 					extp = strrchr(dir->d_name + 1,'.');
 					// if there is no extension, put it in the "Undefined" folder
@@ -118,16 +142,34 @@ int main(int argc, char** argv){
 							printf("Failed to Rename %s\n", dir->d_name);
 
 					}
-					else if(strcmp(dir->d_name, exefile) == 0);
 					// otherwise put it in a folder matching it's extension
 					else{
 						memcpy(ext, extp, sizeof(extp) + 1);		
 						memmove(ext, ext+1, strlen(ext));
-						if(!sortedflag)
-							sprintf(path, "Sorted/%s/%s",ext, dir->d_name);
-						else
-							sprintf(path, "%s/%s",ext, dir->d_name);
+						if(!sortedflag){
 
+							if (advancedflag){
+								if (checkType(ext, Video, sizeof(Video) / sizeof(Video[0])) == 1)
+									sprintf(path, "Sorted/Video/%s", dir->d_name);
+								else if (checkType(ext, Audio, sizeof(Audio) / sizeof(Audio[0])) == 1)
+									sprintf(path, "Sorted/Audio/%s", dir->d_name);
+								else if (checkType(ext, Photo, sizeof(Photo) / sizeof(Photo[0])) == 1)
+									sprintf(path, "Sorted/Photo/%s", dir->d_name);
+							}
+							else sprintf(path, "Sorted/%s/%s",ext, dir->d_name);
+									
+						}
+						else{
+							if (advancedflag){
+								if (checkType(ext, Video, sizeof(Video) / sizeof(Video[0])) == 1)
+									sprintf(path, "Video/%s", dir->d_name);
+								else if (checkType(ext, Audio, sizeof(Audio) / sizeof(Audio[0])) == 1)
+									sprintf(path, "Audio/%s", dir->d_name);
+								else if (checkType(ext, Photo, sizeof(Photo) / sizeof(Photo[0])) == 1)
+									sprintf(path, "Photo/%s", dir->d_name);
+							}
+							else sprintf(path, "%s/%s",ext, dir->d_name);
+						}
 						if((rename(dir->d_name, path)) != 0)
 							printf("Failed to Rename %s\n", dir->d_name);
 					}
