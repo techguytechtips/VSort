@@ -4,9 +4,16 @@
 #include <sys/stat.h>
 #include <string.h>
 #include <getopt.h>
+void makedir(const char *name){
+  #if __WIN32
+  mkdir(name);
+  #else
+  mkdir(name, 0755);
+  #endif
+}
 unsigned char checkType(char* ext, char** Type, size_t sizeofType){
 	for(unsigned short i = 0; i < sizeofType; i++){
-			if (strcmp(ext, Type[i]) == 0)	
+			if (strcmp(ext, Type[i]) == 0)
 				return 1;
 	}
 	return 0;
@@ -17,9 +24,12 @@ int getType(char* ext, char* type){
 	char* Video[] = {"mp4", "mkv", "avi", "ogg", "flv", "mov"};
 	char* Audio[] = {"mp3", "wma", "m4a", "pcm", "wav", "aiff", "aac", "ogg", "flac", "alac"};
 	char* Photo[] = {"png", "jpg", "jpeg", "mpo"};
-	char* Document[] = {"docx", "doc", "pdf", "odt", "odp", "xlsx", "txt", "json", "cfg", "config", "notebook", "c", "cpp", "cs", "py", "js", "rb", "out"};
+	char* Document[] = {"docx", "doc", "pdf", "odt", "odp", "xlsx", "txt", "json", "cfg", "config", "notebook"};
+	char* Code[] = {"c", "cpp", "cs", "py", "js", "rb", "rs", "sh"};
 	char* Shortcut[] = {"lnk", "desktop", "url"};
-	char* Image[] = {"img", "iso", "dvd"};
+	char* Image[] = {"img", "iso", "dvd", "img"};
+	char* Archive[] = {"zip", "rar", "7z", "tar", "gz", "bz2", "xz", "lz4"};
+	char* Program[] = {"exe", "out", "app"};
 	if (checkType(ext, Video, sizeof(Video) / sizeof(Video[0])) == 1)
 		strcpy(type, "Videos");
 	else if (checkType(ext, Audio, sizeof(Audio) / sizeof(Audio[0])) == 1)
@@ -28,10 +38,16 @@ int getType(char* ext, char* type){
 		strcpy(type, "Photos");
 	else if (checkType(ext, Document, sizeof(Document) / sizeof(Document[0])) == 1)
 		strcpy(type, "Documents");
+	else if (checkType(ext, Code, sizeof(Code) / sizeof(Code[0])) == 1)
+		strcpy(type, "Code");
 	else if (checkType(ext, Shortcut, sizeof(Shortcut) / sizeof(Shortcut[0])) == 1)
 		strcpy(type, "Shortcuts");
 	else if (checkType(ext, Image, sizeof(Image) / sizeof(Image[0])) == 1)
 		strcpy(type, "Disc Images");
+	else if (checkType(ext, Archive, sizeof(Archive) / sizeof(Archive[0])) == 1)
+		strcpy(type, "Archives");
+	else if (checkType(ext, Program, sizeof(Program) / sizeof(Program[0])) == 1)
+		strcpy(type, "Programs");
 	else{
 		strcpy(type, "Undefined");
 		return -1;
@@ -41,7 +57,7 @@ int getType(char* ext, char* type){
 }
 
 int main(int argc, char** argv){
-	char exefile[strlen(argv[0])];		
+	char exefile[strlen(argv[0])];
 	char  path[296];
 	char dirpath[296];
 	char* extp;
@@ -76,15 +92,15 @@ int main(int argc, char** argv){
 					advancedflag = 1;
 					break;
 				default:
-				
+
 					printf("Usage: %s [OPTIONS]\n see --help for more information.\n", argv[0]);
 					return 0;
 			}
 
 		}
 	}
-	if(!sortedflag){	
-		mkdir(sortdir, 0755);
+	if(!sortedflag){
+		makedir(sortdir);
 	}
 	memcpy(exefile, argv[0]+2, strlen(argv[0])-1);
 
@@ -101,18 +117,18 @@ int main(int argc, char** argv){
 			if(dir->d_type == DT_REG){
 				if(strcmp(dir->d_name, exefile) == 0);
 				else if(dir->d_name[0] == '.' && hiddenflag == 1);
-				else{	
+				else{
 					extp = strrchr(dir->d_name + 1,'.');
 					// seperate the "." from the filename
 					// if it has no file extension make a "Undefined" folder
 					if(extp == NULL){
 						if(!sortedflag){
-							mkdir("Sorted/Undefined", 0755);
+							makedir("Sorted/Undefined");
 							sprintf(path, "Sorted/Undefined/%s", dir->d_name);
 						}
 						else{
-							mkdir("Undefined", 0755);
-							sprintf(path, "Undefined/%s", dir->d_name);	
+							makedir("Undefined");
+							sprintf(path, "Undefined/%s", dir->d_name);
 						}
 						if((rename(dir->d_name, path)) != 0)
 							printf("Failed to Rename %s\n", dir->d_name);
@@ -122,7 +138,7 @@ int main(int argc, char** argv){
 					else{
 						// strrchr returns a pointer to the last period, not a string,
 						// so to do pointer arithmetic with it, it must be a seperate string
-						memcpy(ext, extp, sizeof(extp) + 1);	
+						memcpy(ext, extp, sizeof(extp) + 1);
 						memmove(ext, ext+1, strlen(ext));
 						// make the folders depending on the sortedflag
 						if(!sortedflag){
@@ -138,8 +154,8 @@ int main(int argc, char** argv){
 								sprintf(path, "Sorted/%s/%s",ext, dir->d_name);
 							}
 
-						
-						}	
+
+						}
 						else
 							if (advancedflag){
 								getType(ext, type);
@@ -150,7 +166,7 @@ int main(int argc, char** argv){
 								strcpy(dirpath, ext);
 								sprintf(path, "%s/%s",ext, dir->d_name);
 							}
-						mkdir(dirpath, 0755);
+						makedir(dirpath);
 						if((rename(dir->d_name, path)) != 0)
 							printf("Failed to Rename %s\n", dir->d_name);
 
@@ -160,8 +176,8 @@ int main(int argc, char** argv){
 			}
 		}
 				closedir(d);
-		
+
 	}
-		
+
 	return 0;
 }

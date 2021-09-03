@@ -11,8 +11,3 @@ Just run VSort and (by default) it will create a "Sorted" directory and copy all
 - Option to exclude hidden files from being sorted (`-h`)
 - Option to put all of the folders it makes in the current working directory instead of a "Sorted" folder (`-n`)
 - Option to use a advanced sorting algorithm instead of just sorting based file extension, so .mp4, .mkv, etc goes into a video folder and so on (`-a`)
-
-## Note
-Linux only.
-
-Windows support coming soon!
