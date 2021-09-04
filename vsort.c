@@ -57,39 +57,43 @@ int getType(char* ext, char* type){
 }
 
 int main(int argc, char** argv){
-	char exefile[strlen(argv[0])];
+	char  exefile[strlen(argv[0])];
 	char  path[296];
-	char dirpath[296];
-	char* extp;
+	char  dirpath[296];
+	char  type[20];
 	char  ext[20];
-	char* sortdir = "Sorted";
-	char type[20];
+	char* extp;
+	char* sortdir = "Sorted/";
 
 	// flags
-	unsigned char sortedflag = 0;
+	unsigned char sortflag = 0;
 	unsigned char hiddenflag = 0;
 	unsigned char advancedflag = 0;
 
 	int option_index = 0;
 
-	// make the "Sorted" directory
 	if (argc > 1){
 		if (strcmp(argv[1], "--help") == 0)
 		{
-			printf("Usage: %s [OPTIONS]\n-h\tDon't sort hidden files.\n-n \tDon't create a Sorted Directory.\n-a\tAdvanced Sorting, see Github for more info.\n", argv[0]);
+			printf("Usage: %s [OPTIONS]\n-s\tSort based on file extension\n-h\tDon't sort hidden files.\n-n \tDon't create a Sorted Directory.\n-a\tSort based on type.\n", argv[0]);
 			return 0;
 		}
 
-		while (( option_index = getopt(argc, argv, "hna")) != -1){
-			switch (option_index){
-				case 'n':
-					sortedflag = 1;
-					break;
-				case 'h':
-					hiddenflag = 1;
-					break;
+		while (( option_index = getopt(argc, argv, "sanh")) != -1){
+			switch (option_index){;
 				case 'a':
 					advancedflag = 1;
+					break;
+				case 's':
+					sortflag = 1;
+					break;
+				case 'n':
+					if (sortflag || advancedflag)
+						sortdir = "";
+					break;
+				case 'h':
+					if (sortflag || advancedflag)
+						hiddenflag = 1;
 					break;
 				default:
 
@@ -99,10 +103,16 @@ int main(int argc, char** argv){
 
 		}
 	}
-	if(!sortedflag){
-		makedir(sortdir);
+	else{
+		printf("Usage: %s [OPTIONS]\n see --help for more information.\n", argv[0]);
+		return 0;
 	}
+
+
 	memcpy(exefile, argv[0]+2, strlen(argv[0])-1);
+	
+	// make sorted dir
+	makedir(sortdir);
 
 	// open the current working directory
 	DIR *d;
@@ -122,61 +132,39 @@ int main(int argc, char** argv){
 					// seperate the "." from the filename
 					// if it has no file extension make a "Undefined" folder
 					if(extp == NULL){
-						if(!sortedflag){
-							makedir("Sorted/Undefined");
-							sprintf(path, "Sorted/Undefined/%s", dir->d_name);
-						}
-						else{
-							makedir("Undefined");
-							sprintf(path, "Undefined/%s", dir->d_name);
-						}
-						if((rename(dir->d_name, path)) != 0)
-							printf("Failed to Rename %s\n", dir->d_name);
-
+						sprintf(dirpath, "%sUndefined", sortdir);	
+						sprintf(path, "%sUndefined/%s", sortdir, dir->d_name);
+						makedir(dirpath);
 					}
-					// otherwise make a folder for all of the extensions
+					// otherwise make a folder for extension and move extension to folder
 					else{
 						// strrchr returns a pointer to the last period, not a string,
 						// so to do pointer arithmetic with it, it must be a seperate string
 						memcpy(ext, extp, sizeof(extp) + 1);
 						memmove(ext, ext+1, strlen(ext));
-						// make the folders depending on the sortedflag
-						if(!sortedflag){
-							if (advancedflag){
-								if(getType(ext, type) < 0)
-									printf("file extension \"%s\" not defined\n", ext);
+						if (advancedflag){
+							if(getType(ext, type) < 0)
+								printf("file extension \"%s\" not defined\n", ext);
 
-								sprintf(dirpath, "Sorted/%s", type);
-								sprintf(path, "Sorted/%s/%s", type, dir->d_name);
-							}
-							else{
-								sprintf(dirpath, "Sorted/%s", ext);
-								sprintf(path, "Sorted/%s/%s",ext, dir->d_name);
-							}
-
-
+							sprintf(dirpath, "%s%s", sortdir, type);
+							sprintf(path, "%s%s/%s", sortdir, type, dir->d_name);
 						}
-						else
-							if (advancedflag){
-								getType(ext, type);
-								strcpy(dirpath, type);
-								sprintf(path, "%s/%s", type, dir->d_name);
-							}
-							else{
-								strcpy(dirpath, ext);
-								sprintf(path, "%s/%s",ext, dir->d_name);
-							}
-						makedir(dirpath);
-						if((rename(dir->d_name, path)) != 0)
-							printf("Failed to Rename %s\n", dir->d_name);
-
-
+						else if (sortflag){
+							sprintf(dirpath, "%s%s", sortdir, ext);
+							sprintf(path, "%s%s/%s", sortdir, ext, dir->d_name);
+						}
 					}
+					makedir(dirpath);
+					if((rename(dir->d_name, path)) != 0)
+						printf("Failed to Rename %s\n", dir->d_name);
+
+
+					
 				}
 			}
+		
 		}
-				closedir(d);
-
+		closedir(d);
 	}
 
 	return 0;
