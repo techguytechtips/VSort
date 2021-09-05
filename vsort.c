@@ -59,7 +59,7 @@ int getType(char* ext, char* type){
 int extsort(char* cwd, char* sortdir, char* ext, char* filename){
 	char path[296];
 	char dirpath[296];
-	char filepath[296];	
+	char filepath[296];
 	sprintf(dirpath, "%s/%s%s", cwd, sortdir, ext);
 	sprintf(path, "%s/%s%s/%s", cwd, sortdir, ext, filename);
 	sprintf(filepath, "%s/%s", cwd, filename);
@@ -70,14 +70,14 @@ int extsort(char* cwd, char* sortdir, char* ext, char* filename){
 
 }
 int main(int argc, char** argv){
-	char  exefile[strlen(argv[0])];
+	//char  exefile[strlen(argv[0])];
 	char  path[296];
 	char  dirpath[296];
 	char  type[20];
 	char  ext[20];
 	char* extp;
 	char* sortdir = "Sorted/";
-	
+
 	// flags
 	unsigned char sortflag = 0;
 	unsigned char hiddenflag = 0;
@@ -121,9 +121,6 @@ int main(int argc, char** argv){
 		return 0;
 	}
 
-
-	memcpy(exefile, argv[0]+2, strlen(argv[0])-1);
-	
 	// make sorted dir
 	makedir(sortdir);
 
@@ -138,6 +135,7 @@ int main(int argc, char** argv){
 		while ((dir = readdir(d)) != NULL){
 			// make sure its a regular file, no folders, symlinks, inodes, etc.
 			if(dir->d_type == DT_REG){
+                		char *exefile = &argv[0][strlen(argv[0]) - strlen(dir->d_name)];
 				if(strcmp(dir->d_name, exefile) == 0);
 				else if(dir->d_name[0] == '.' && hiddenflag == 1);
 				else{
@@ -145,7 +143,7 @@ int main(int argc, char** argv){
 					// seperate the "." from the filename
 					// if it has no file extension make a "Undefined" folder
 					if(extp == NULL){
-						sprintf(dirpath, "%sUndefined", sortdir);	
+						sprintf(dirpath, "%sUndefined", sortdir);
 						sprintf(path, "%sUndefined/%s", sortdir, dir->d_name);
 						makedir(dirpath);
 						if((rename(dir->d_name, path)) != 0)
@@ -174,13 +172,13 @@ int main(int argc, char** argv){
 						}
 						else if (sortflag)
 							extsort(".", sortdir, ext, dir->d_name);
-						
+
 					}
-					
-					
+
+
 				}
 			}
-		
+
 		}
 		closedir(d);
 	}
