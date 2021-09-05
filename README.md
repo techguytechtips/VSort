@@ -1,7 +1,8 @@
 # VSort
 
 ## About
-VSort takes all files in a directory and sorts them based on file extension for easy organizing or better to organize afterwards.
+VSort is the Swiss army knife of file organizing, allowing you to organize files with many options and features.
+Including, organizing based on file extension, file type, and more coming soon!
 
 ## Usage
 Just run `vsort -s` and (by default) it will create a "Sorted" directory and copy all the files in the current working directory into a Sorted/(File extension) Folder.
