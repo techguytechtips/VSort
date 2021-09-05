@@ -4,6 +4,7 @@
 #include <sys/stat.h>
 #include <string.h>
 #include <getopt.h>
+
 void makedir(const char *name){
   #if __WIN32
   mkdir(name);
@@ -55,7 +56,19 @@ int getType(char* ext, char* type){
 	return 0;
 
 }
+int extsort(char* cwd, char* sortdir, char* ext, char* filename){
+	char path[296];
+	char dirpath[296];
+	char filepath[296];	
+	sprintf(dirpath, "%s/%s%s", cwd, sortdir, ext);
+	sprintf(path, "%s/%s%s/%s", cwd, sortdir, ext, filename);
+	sprintf(filepath, "%s/%s", cwd, filename);
+	makedir(dirpath);
+	if((rename(filepath, path)) != 0)
+		printf("Failed to Rename %s\n", filename);
 
+
+}
 int main(int argc, char** argv){
 	char  exefile[strlen(argv[0])];
 	char  path[296];
@@ -64,7 +77,7 @@ int main(int argc, char** argv){
 	char  ext[20];
 	char* extp;
 	char* sortdir = "Sorted/";
-
+	
 	// flags
 	unsigned char sortflag = 0;
 	unsigned char hiddenflag = 0;
@@ -135,6 +148,9 @@ int main(int argc, char** argv){
 						sprintf(dirpath, "%sUndefined", sortdir);	
 						sprintf(path, "%sUndefined/%s", sortdir, dir->d_name);
 						makedir(dirpath);
+						if((rename(dir->d_name, path)) != 0)
+							printf("Failed to Rename %s\n", dir->d_name);
+
 					}
 					// otherwise make a folder for extension and move extension to folder
 					else{
@@ -148,17 +164,19 @@ int main(int argc, char** argv){
 
 							sprintf(dirpath, "%s%s", sortdir, type);
 							sprintf(path, "%s%s/%s", sortdir, type, dir->d_name);
+							makedir(dirpath);
+							if((rename(dir->d_name, path)) != 0)
+								printf("Failed to Rename %s\n", dir->d_name);
+							if (sortflag)
+								extsort(dirpath, "", ext, dir->d_name);
+
+
 						}
-						else if (sortflag){
-							sprintf(dirpath, "%s%s", sortdir, ext);
-							sprintf(path, "%s%s/%s", sortdir, ext, dir->d_name);
-						}
+						else if (sortflag)
+							extsort(".", sortdir, ext, dir->d_name);
+						
 					}
-					makedir(dirpath);
-					if((rename(dir->d_name, path)) != 0)
-						printf("Failed to Rename %s\n", dir->d_name);
-
-
+					
 					
 				}
 			}
