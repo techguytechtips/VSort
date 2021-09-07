@@ -5,13 +5,16 @@
 #include <string.h>
 #include <getopt.h>
 
+// cross platform mkdir function because
+// Windows doesn't use the same function args
 void makedir(const char *name){
-  #if __WIN32
-  mkdir(name);
-  #else
-  mkdir(name, 0755);
-  #endif
+ 	#if __WIN32
+ 	mkdir(name);
+ 	#else
+ 	mkdir(name, 0755);
+ 	#endif
 }
+// function with a for loop to check if the ext resides in the array passed
 unsigned char checkType(char* ext, char** Type, size_t sizeofType){
 	for(unsigned short i = 0; i < sizeofType; i++){
 			if (strcmp(ext, Type[i]) == 0)
@@ -19,6 +22,8 @@ unsigned char checkType(char* ext, char** Type, size_t sizeofType){
 	}
 	return 0;
 }
+
+// inefficient function to figure out what type the file is
 int getType(char* ext, char* type){
 
 	// array for advanced sorting
@@ -31,6 +36,8 @@ int getType(char* ext, char* type){
 	char* Image[] = {"img", "iso", "dvd", "img"};
 	char* Archive[] = {"zip", "rar", "7z", "tar", "gz", "bz2", "xz", "lz4"};
 	char* Program[] = {"exe", "out", "app"};
+
+	// bad if/else block for checking type, I am still thinking of a solution
 	if (checkType(ext, Video, sizeof(Video) / sizeof(Video[0])) == 1)
 		strcpy(type, "Videos");
 	else if (checkType(ext, Audio, sizeof(Audio) / sizeof(Audio[0])) == 1)
@@ -56,12 +63,20 @@ int getType(char* ext, char* type){
 	return 0;
 
 }
+
+// function to sort files based on extension
 int extsort(char* cwd, char* sortdir, char* ext, char* filename){
 	char path[296];
 	char dirpath[296];
 	char filepath[296];
+
+	// create string which represents path to create dirs
 	sprintf(dirpath, "%s/%s%s", cwd, sortdir, ext);
+
+	// create string which represents path to put file
 	sprintf(path, "%s/%s%s/%s", cwd, sortdir, ext, filename);
+
+	// create a string which represents the original file path before moving
 	sprintf(filepath, "%s/%s", cwd, filename);
 	makedir(dirpath);
 	if((rename(filepath, path)) != 0)
@@ -69,8 +84,14 @@ int extsort(char* cwd, char* sortdir, char* ext, char* filename){
 
 
 }
+
+// function to print help menu since it will be used many times
+void help(char* name){
+	printf("Usage: %s [OPTIONS]\n see --help for more information.\n", name);
+}
+
 int main(int argc, char** argv){
-	//char  exefile[strlen(argv[0])];
+	// set up arrays/strings
 	char  path[296];
 	char  dirpath[296];
 	char  type[20];
@@ -83,8 +104,8 @@ int main(int argc, char** argv){
 	unsigned char hiddenflag = 0;
 	unsigned char advancedflag = 0;
 
+	// get and deal with command line arguments
 	int option_index = 0;
-
 	if (argc > 1){
 		if (strcmp(argv[1], "--help") == 0)
 		{
@@ -103,25 +124,33 @@ int main(int argc, char** argv){
 				case 'n':
 					if (sortflag || advancedflag)
 						sortdir = "";
+					else{
+						help(argv[0]);
+						return 0;
+					}
 					break;
 				case 'h':
 					if (sortflag || advancedflag)
 						hiddenflag = 1;
+					else{
+						help(argv[0]);
+						return 0;
+					}
 					break;
 				default:
 
-					printf("Usage: %s [OPTIONS]\n see --help for more information.\n", argv[0]);
+					help(argv[0]);
 					return 0;
 			}
 
 		}
 	}
 	else{
-		printf("Usage: %s [OPTIONS]\n see --help for more information.\n", argv[0]);
+		help(argv[0]);
 		return 0;
 	}
 
-	// make sorted dir
+	// make sorted dir (or not depending on the sortdirflag)
 	makedir(sortdir);
 
 	// open the current working directory
@@ -135,12 +164,25 @@ int main(int argc, char** argv){
 		while ((dir = readdir(d)) != NULL){
 			// make sure its a regular file, no folders, symlinks, inodes, etc.
 			if(dir->d_type == DT_REG){
+
+				// confusing line that basically takes the last x amount letters from argv
+				// x = the amount of letters in the current file
+				// doing this allows the ability to check if the current file is equal to
+				// the programs name, this check is so it doesn't copy it's self and pass over it
+				// the reason it needs to be done like this is because Windows stores the full path in argv[0]
                 		char *exefile = &argv[0][strlen(argv[0]) - strlen(dir->d_name)];
 				if(strcmp(dir->d_name, exefile) == 0);
+
+				// check if the file starts with a dot (meaning its hidden on linux)
+				// and if it's set not to copy hidden files
+				// if both of those are true, skip the file
+				// (still working for a way that also works on windows)
 				else if(dir->d_name[0] == '.' && hiddenflag == 1);
 				else{
-					extp = strrchr(dir->d_name + 1,'.');
 					// seperate the "." from the filename
+					// to single out the extenstion
+					extp = strrchr(dir->d_name + 1,'.');
+
 					// if it has no file extension make a "Undefined" folder
 					if(extp == NULL){
 						sprintf(dirpath, "%sUndefined", sortdir);
@@ -156,32 +198,38 @@ int main(int argc, char** argv){
 						// so to do pointer arithmetic with it, it must be a seperate string
 						memcpy(ext, extp, sizeof(extp) + 1);
 						memmove(ext, ext+1, strlen(ext));
+						
+						// if advanced sort is requested
 						if (advancedflag){
+
+							// if extenstion doesn't match any known type
 							if(getType(ext, type) < 0)
 								printf("file extension \"%s\" not defined\n", ext);
-
+					
 							sprintf(dirpath, "%s%s", sortdir, type);
 							sprintf(path, "%s%s/%s", sortdir, type, dir->d_name);
 							makedir(dirpath);
 							if((rename(dir->d_name, path)) != 0)
 								printf("Failed to Rename %s\n", dir->d_name);
+
+							// if ext sorting is requested ALONG with advanced sort
+							// it will first sort it based on type then extension inside each folder
 							if (sortflag)
 								extsort(dirpath, "", ext, dir->d_name);
 
 
 						}
+						// if ext sorting is requested
 						else if (sortflag)
 							extsort(".", sortdir, ext, dir->d_name);
 
 					}
-
-
 				}
 			}
-
 		}
+
+		// finished all files, close the dir pointer and exit the program
 		closedir(d);
 	}
-
 	return 0;
 }
