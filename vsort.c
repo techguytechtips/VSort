@@ -4,6 +4,7 @@
 #include <sys/stat.h>
 #include <string.h>
 #include <getopt.h>
+#include <ctype.h>
 
 // cross platform mkdir function because
 // Windows doesn't use the same function args
@@ -28,14 +29,15 @@ int getType(char* ext, char* type){
 
 	// array for advanced sorting
 	char* Video[] = {"mp4", "mkv", "avi", "ogg", "flv", "mov"};
-	char* Audio[] = {"mp3", "wma", "m4a", "pcm", "wav", "aiff", "aac", "ogg", "flac", "alac"};
-	char* Photo[] = {"png", "jpg", "jpeg", "mpo"};
-	char* Document[] = {"docx", "doc", "pdf", "odt", "odp", "xlsx", "txt", "json", "cfg", "config", "notebook"};
+	char* Audio[] = {"mp3", "wma", "m4a", "pcm", "wav", "aiff", "aac", "ogg", "flac", "alac", "acm"};
+	char* Photo[] = {"png", "jpg", "jpeg", "mpo", "gif", "bmp"};
+	char* Document[] = {"docx", "doc", "pdf", "odt", "odp", "xlsx", "txt", "json", "cfg", "config", "notebook", "bak"};
 	char* Code[] = {"c", "cpp", "cs", "py", "js", "rb", "rs", "sh"};
 	char* Shortcut[] = {"lnk", "desktop", "url"};
 	char* Image[] = {"img", "iso", "dvd", "img"};
 	char* Archive[] = {"zip", "rar", "7z", "tar", "gz", "bz2", "xz", "lz4"};
 	char* Program[] = {"exe", "out", "app"};
+	char* System[] = {"ini", "dll", "dat", "inf", "drv"};
 
 	// bad if/else block for checking type, I am still thinking of a solution
 	if (checkType(ext, Video, sizeof(Video) / sizeof(Video[0])) == 1)
@@ -56,11 +58,19 @@ int getType(char* ext, char* type){
 		strcpy(type, "Archives");
 	else if (checkType(ext, Program, sizeof(Program) / sizeof(Program[0])) == 1)
 		strcpy(type, "Programs");
+	else if (checkType(ext, System, sizeof(System) / sizeof(System[0])) == 1)
+		strcpy(type, "System Files");
 	else{
 		strcpy(type, "Undefined");
 		return -1;
 	}
 	return 0;
+
+}
+// simple string tolower function
+void toLower(char* string){
+	for(int i = 0; string[i]; i++)
+  		string[i] = tolower(string[i]);
 
 }
 
@@ -198,7 +208,11 @@ int main(int argc, char** argv){
 						// so to do pointer arithmetic with it, it must be a seperate string
 						memcpy(ext, extp, sizeof(extp) + 1);
 						memmove(ext, ext+1, strlen(ext));
-						
+						// make the ext lowercase before we check it
+						// this doesn't effect the file but makes it
+						// where we don't think .EXE and .exe are two different files
+						toLower(ext);
+
 						// if advanced sort is requested
 						if (advancedflag){
 
