@@ -30,14 +30,14 @@ int getType(char* ext, char* type){
 	// array for advanced sorting
 	char* Video[] = {"mp4", "mkv", "avi", "ogg", "flv", "mov"};
 	char* Audio[] = {"mp3", "wma", "m4a", "pcm", "wav", "aiff", "aac", "ogg", "flac", "alac", "acm"};
-	char* Photo[] = {"png", "jpg", "jpeg", "mpo", "gif", "bmp"};
+	char* Photo[] = {"png", "jpg", "jpeg", "mpo", "gif", "bmp, ico"};
 	char* Document[] = {"docx", "doc", "pdf", "odt", "odp", "xlsx", "txt", "json", "cfg", "config", "notebook", "bak"};
-	char* Code[] = {"c", "cpp", "cs", "py", "js", "rb", "rs", "sh"};
+	char* Code[] = {"c", "cpp", "cs", "py", "js", "rb", "rs", "sh", "htm", "html" "css"};
 	char* Shortcut[] = {"lnk", "desktop", "url"};
 	char* Image[] = {"img", "iso", "dvd", "img"};
 	char* Archive[] = {"zip", "rar", "7z", "tar", "gz", "bz2", "xz", "lz4"};
 	char* Program[] = {"exe", "out", "app"};
-	char* System[] = {"ini", "dll", "dat", "inf", "drv"};
+	char* System[] = {"ini", "dll", "dat", "inf", "drv", "sys", "bin", "dmp"};
 
 	// bad if/else block for checking type, I am still thinking of a solution
 	if (checkType(ext, Video, sizeof(Video) / sizeof(Video[0])) == 1)
@@ -105,8 +105,7 @@ int main(int argc, char** argv){
 	char  path[296];
 	char  dirpath[296];
 	char  type[20];
-	char  ext[20];
-	char* extp;
+	char  ext[296];	
 	char* sortdir = "Sorted/";
 
 	// flags
@@ -191,7 +190,7 @@ int main(int argc, char** argv){
 				else{
 					// seperate the "." from the filename
 					// to single out the extenstion
-					extp = strrchr(dir->d_name + 1,'.');
+					char *extp = strrchr(dir->d_name + 1,'.');
 
 					// if it has no file extension make a "Undefined" folder
 					if(extp == NULL){
@@ -207,7 +206,8 @@ int main(int argc, char** argv){
 						// strrchr returns a pointer to the last period, not a string,
 						// so to do pointer arithmetic with it, it must be a seperate string
 						memcpy(ext, extp, sizeof(extp) + 1);
-						memmove(ext, ext+1, strlen(ext));
+						memmove(ext, ext+1, sizeof(ext));
+
 						// make the ext lowercase before we check it
 						// this doesn't effect the file but makes it
 						// where we don't think .EXE and .exe are two different files
