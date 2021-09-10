@@ -15,63 +15,60 @@ void makedir(const char *name){
  	mkdir(name, 0755);
  	#endif
 }
-// function with a for loop to check if the ext resides in the array passed
-unsigned char checkType(char* ext, char** Type, size_t sizeofType){
-	for(unsigned short i = 0; i < sizeofType; i++){
-			if (strcmp(ext, Type[i]) == 0)
-				return 1;
-	}
-	return 0;
-}
-
-// inefficient function to figure out what type the file is
+// function to figure out what type the file is
 int getType(char* ext, char* type){
+	// set the first byte to null to later
+	// check if there was no match with the current file ext
+	type[0] = '\0';
 
 	// array for advanced sorting
-	char* Video[] = {"mp4", "mkv", "avi", "ogg", "flv", "mov"};
-	char* Audio[] = {"mp3", "wma", "m4a", "pcm", "wav", "aiff", "aac", "ogg", "flac", "alac", "acm"};
-	char* Photo[] = {"png", "jpg", "jpeg", "mpo", "gif", "bmp, ico"};
-	char* Document[] = {"docx", "doc", "pdf", "odt", "odp", "xlsx", "txt", "json", "cfg", "config", "notebook", "bak"};
-	char* Code[] = {"c", "cpp", "cs", "py", "js", "rb", "rs", "sh", "htm", "html" "css"};
-	char* Shortcut[] = {"lnk", "desktop", "url"};
-	char* Image[] = {"img", "iso", "dvd", "img"};
-	char* Archive[] = {"zip", "rar", "7z", "tar", "gz", "bz2", "xz", "lz4"};
-	char* Program[] = {"exe", "out", "app"};
-	char* System[] = {"ini", "dll", "dat", "inf", "drv", "sys", "bin", "dmp"};
+	// the first element on every line is the type of extension
+	char* Formats[] = {
+	"Video", "mp4", "mkv", "avi", "ogg", "flv", "mov",
+	"Audio", "mp3", "wma", "m4a", "pcm", "wav", "aiff", "aac", "ogg", "flac", "alac", "acm",
+	"Photo", "png", "jpg", "jpeg", "mpo", "gif", "bmp", "ico",
+	"Document", "docx", "doc", "pdf", "odt", "odp", "xlsx", "txt", "json", "cfg", "config", "conf", "notebook", "bak",
+	"Code", "c", "h", "cpp", "hpp", "cs", "py", "js", "rb", "rs", "sh", "htm", "html", "css",
+	"Shortcut", "lnk", "desktop", "url",
+	"Image", "img", "iso", "dvd", "img",
+	"Archive", "zip", "rar", "7z", "tar", "gz", "bz2", "xz", "lz4",
+	"Program", "exe", "out", "app",
+	"System", "ini", "dll", "dat", "inf", "drv", "sys", "bin", "dmp",
+	// this is for the last extension type so the for loop
+	// doesn't read outside the array to look for the next name
+	"END"
+	};
+	// array with the offset for each extension type
+	short offsets[] = {0, 7, 19, 27, 41, 55, 59, 64, 74, 78, 87};
+	// for every extension type
+	for (int i = 0; i <= 9; i++){
 
-	// bad if/else block for checking type, I am still thinking of a solution
-	if (checkType(ext, Video, sizeof(Video) / sizeof(Video[0])) == 1)
-		strcpy(type, "Videos");
-	else if (checkType(ext, Audio, sizeof(Audio) / sizeof(Audio[0])) == 1)
-		strcpy(type, "Audios");
-	else if (checkType(ext, Photo, sizeof(Photo) / sizeof(Photo[0])) == 1)
-		strcpy(type, "Photos");
-	else if (checkType(ext, Document, sizeof(Document) / sizeof(Document[0])) == 1)
-		strcpy(type, "Documents");
-	else if (checkType(ext, Code, sizeof(Code) / sizeof(Code[0])) == 1)
-		strcpy(type, "Code");
-	else if (checkType(ext, Shortcut, sizeof(Shortcut) / sizeof(Shortcut[0])) == 1)
-		strcpy(type, "Shortcuts");
-	else if (checkType(ext, Image, sizeof(Image) / sizeof(Image[0])) == 1)
-		strcpy(type, "Disc Images");
-	else if (checkType(ext, Archive, sizeof(Archive) / sizeof(Archive[0])) == 1)
-		strcpy(type, "Archives");
-	else if (checkType(ext, Program, sizeof(Program) / sizeof(Program[0])) == 1)
-		strcpy(type, "Programs");
-	else if (checkType(ext, System, sizeof(System) / sizeof(System[0])) == 1)
-		strcpy(type, "System Files");
-	else{
-		strcpy(type, "Undefined");
-		return -1;
+		// for every extension in said type
+		// (calculated when to start and stop based on offsets)
+		for (int x = (offsets[i])+1; x < offsets[i+1]; x++)
+		{
+			// if the extension matches the current file extension
+			if (strcmp(Formats[x], ext) == 0){
+
+				// set the passed "type" array to the type of the extension that matched
+				strcpy(type, Formats[offsets[i]]);
+
+				// return because we found our match
+				return 0;
+			}
+		}
 	}
-	return 0;
-
+	// if the first byte is still null
+	// there was no match so return -1
+	if (type[0] == '\0')	
+		return -1;
+	// this shouldn't be possible but just incase return -2
+	return -2;
 }
 // simple string tolower function
 void toLower(char* string){
 	for(int i = 0; string[i]; i++)
   		string[i] = tolower(string[i]);
-
 }
 
 // function to sort files based on extension
@@ -217,9 +214,10 @@ int main(int argc, char** argv){
 						if (advancedflag){
 
 							// if extenstion doesn't match any known type
-							if(getType(ext, type) < 0)
+							if(getType(ext, type) < 0){
 								printf("file extension \"%s\" not defined\n", ext);
-					
+								strcpy(type, "Undefined");
+							}
 							sprintf(dirpath, "%s%s", sortdir, type);
 							sprintf(path, "%s%s/%s", sortdir, type, dir->d_name);
 							makedir(dirpath);
@@ -230,7 +228,7 @@ int main(int argc, char** argv){
 							// it will first sort it based on type then extension inside each folder
 							if (sortflag)
 								extsort(dirpath, "", ext, dir->d_name);
-
+					
 
 						}
 						// if ext sorting is requested
