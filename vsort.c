@@ -202,7 +202,11 @@ int main(int argc, char** argv){
 					else{
 						// strrchr returns a pointer to the last period, not a string,
 						// so to do pointer arithmetic with it, it must be a seperate string
-						memcpy(ext, extp, sizeof(extp) + 1);
+						// for loop to find the length of the extension
+						for (int i = 0; i < strlen(dir->d_name); ++i)
+							if ( extp == &dir->d_name[i] )
+								memcpy(ext, extp, (strlen(dir->d_name)-i) + 1);
+					
 						memmove(ext, ext+1, sizeof(ext));
 
 						// make the ext lowercase before we check it
